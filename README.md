@@ -36,7 +36,6 @@ We will use Django (https://www.djangoproject.com) as our web framework for the 
 ```bash
 python manage.py migrate # Migrate databases
 python manage.py createsuperuser # Create an admin user
-python manage.py createsuperuser # Create an administrative user
 ```
 
 **Data Import**
