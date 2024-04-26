@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Category Details{% endblock %}
+
+{% block header %}Category Details{% endblock %}
+
+{% block content %}
+    <table>
+        <thead>
+            <tr>
+                <th>Category ID</th>
+                <th>Category Name</th>
+                <th>Parent ID</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ category.category_id }}</td>
+                <td>{{ category.name }}</td>
+                <td>{{ category.parent_id }}</td>
+            </tr>
+        </tbody>
+    </table>
+{% endblock %}

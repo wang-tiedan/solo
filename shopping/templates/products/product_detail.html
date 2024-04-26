@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% load shopping_filters %} 
+{% load cart_tags %}
+{% block title %}Product Details{% endblock %}
+
+{% block header %}Product Details{% endblock %}
+
+{% block content %}
+
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script> 
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.add-to-cart-form').submit(function(e) {
+            e.preventDefault();
+            var form = $(this);
+            $.ajax({
+                url: form.attr('action'),
+                type: form.attr('method'),
+                data: form.serialize(),
+                headers: {'X-CSRFToken': getCookie('csrftoken')},
+                success: function(data) {
+                    if (data.success) {
+                        $('#cart-btn').text('Cart (' + data.cartTotalQuantity + ')');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    if (xhr.status === 403) {
+                        alert(xhr.responseJSON.error);
+                        window.location.href = '/login/?next=' + window.location.pathname;
+                    } else {
+                        console.log('An error occurred: ' + error);
+                    }
+                }
+            });
+        });
+        
+        // Function to clear the cart
+        function clearCart() {
+            $.ajax({
+                url: "{% url 'clear_cart' %}",
+                type: "POST",
+                data: {},
+                headers: {'X-CSRFToken': getCookie('csrftoken')},
+                success: function(data) {
+                    if (data.success) {
+                        $('#cart-btn').text('Cart (0)'); 
+                        console.log('Cart has been cleared.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log('An error occurred while clearing the cart: ' + error);
+                }
+            });
+        }
+
+        // Helper function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = jQuery.trim(cookies[i]);
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Bind click event to the Clear Cart button
+        $('#clear-cart-btn').click(function() {
+            clearCart();
+        });
+    });
+</script>
+
+
+
+
+<form method="GET" action="{% url 'product-detail' %}">
+    <input type="text" name="query" value="{{ request.GET.query }}" placeholder="search bu product ID/name/SKU">
+    <input type="text" name="min_price" value="{{ request.GET.min_price }}" placeholder="lowest price">
+    <input type="text" name="max_price" value="{{ request.GET.max_price }}" placeholder="highest price">
+    <select name="sort">
+        <option value="name" {% if request.GET.sort == 'name' %}selected{% endif %}>sort by name</option>
+        <option value="price_asc" {% if request.GET.sort == 'price_asc' %}selected{% endif %}>price from low to high</option>
+        <option value="price_desc" {% if request.GET.sort == 'price_desc' %}selected{% endif %}>proce from high to low</option>
+    </select>
+    <button type="submit">search</button>
+</form>
+
+<button onclick="location.href='{% url 'product-detail' %}'">reset your research</button>
+<div>
+    <p>: Maximum price per page:{{ page_max_price }}</p>
+    <p>Lowest price per page: {{ page_min_price }}</p>
+    <p>Average price per page: {{ page_avg_price }}</p>
+</div>
+<!-- Line chart display position -->
+<div id="line_plot">{{ line_plot_div|safe }}</div>
+
+<!-- Pie chart display position -->
+<div id="pie_plot">{{ pie_plot_div|safe }}</div>
+
+
+<!-- admin access botton -->
+{% if user.is_authenticated %}
+    <div>Hello, {{ user.username }}</div>
+    <form action="{% url 'user_logout' %}" method="get">
+        <button type="submit">Logout</button>
+    </form>
+{% else %}
+    <form action="{% url 'user_login' %}" method="GET">
+        <input type="hidden" name="next" value="{% url 'product-modifications' %}">
+        <button type="submit">Access to Log In</button>
+    </form>
+{% endif %}
+
+
+{% comment %} cart botton{% endcomment %}
+<div class="shopping-cart">
+    <button onclick="location.href='{% url 'view_cart' %}'" id="cart-btn">
+        Cart ({{ total_items }})
+    </button>
+    <!-- clear cart botton -->
+    <button onclick="clearCart()" id="clear-cart-btn">Clear Cart</button>
+</div>
+
+
+<table>
+    <thead>
+        <tr>
+            <th>Product ID</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Description</th>
+            <th>SKU</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for product in page_obj %}
+    <tr>
+        <td><a href="{% url 'product-category-detail' product_id=product.product_id %}">{{ product.product_id }}</a></td>
+        <td>{{ product.name }}</td>
+        <td>{{ product.price }}</td>
+        <td>{{ product.description }}</td>
+        <td>
+    <form class="add-to-cart-form" action="{% url 'add_to_cart' product.product_id %}" method="get">
+        <button type="submit" class="add-to-cart-btn">Add to Cart</button>
+    </form>
+</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="5">No result</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+
+<!-- paging control -->
+<div>
+    {% if page_obj.has_previous %}
+        <a href="?page=1{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">首 页</a>
+        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">上一页</a>
+    {% endif %}
+    <span>Page：{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">下一页</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">末 页</a>
+    {% endif %}
+</div>
+
+{% endblock %}

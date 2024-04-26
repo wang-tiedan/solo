@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Product Modification Record{% endblock %}
+
+{% block header %}Product Modification Record{% endblock %}
+
+{% block content %}
+<h3>Click on the pillar to view detailed information about the creator and modifier.</h3>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<div class="row">
+    <!-- Bar Chart 1: Creator Counts -->
+    <div class="col-md-6">
+        <div id="creator_counts_chart"></div>
+    </div>
+
+    <!-- Bar Chart 2: Last Modified Counts -->
+    <div class="col-md-6">
+        <div id="last_modified_counts_chart"></div>
+    </div>
+</div>
+
+<script>
+   // Bar Chart 1: Creator Counts
+   var creatorData = [{
+    x: {{ creator_ids|safe }},
+    y: {{ creator_counts_list|safe }},
+    type: 'bar',
+    marker: {
+        color: 'rgb(255, 153, 51)'
+    }
+}];
+var creatorLayout = {
+    title: 'Creator ID vs Count',
+    xaxis: { title: 'Creator ID' },
+    yaxis: { title: 'Count' }
+};
+Plotly.newPlot('creator_counts_chart', creatorData, creatorLayout)
+.then(function() {
+    var creatorChart = document.getElementById('creator_counts_chart');
+    creatorChart.on('plotly_click', function(data){
+        var creatorId = data.points[0].x;  // Get clicked creator ID
+        window.location.href = '/creator/' + creatorId + '/products/';  // Redirect to the creator products page
+    });
+});
+
+    
+    // Bar Chart 2: Last Modified Counts
+    var lastModifiedData = [{
+        x: {{ last_modified_ids|safe }},
+        y: {{ last_modified_counts_list|safe }},
+        type: 'bar',
+        marker: {
+            color: 'rgb(55, 83, 109)'
+        }
+    }];
+    var lastModifiedLayout = {
+        title: 'Last Modified By ID vs Count',
+        xaxis: { title: 'Last Modified By ID' },
+        yaxis: { title: 'Count' }
+    };
+    Plotly.newPlot('last_modified_counts_chart', lastModifiedData, lastModifiedLayout)
+    .then(function() {
+        var lastModifiedChart = document.getElementById('last_modified_counts_chart');
+        lastModifiedChart.on('plotly_click', function(data){
+            var lastModifiedId = data.points[0].x;  // Get clicked last modified ID
+            window.location.href = '/last_modified_by_creator/' + lastModifiedId + '/';  // Redirect to last modified by creator page
+        });
+    });
+</script>
+
+
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Product ID</th>
+            <th>Modified ID</th>
+            <th>Creation Time</th>
+            <th>Creator ID</th>
+            <th>Last Modified Time</th>
+            <th>Last Modified Creator ID</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for modification in page_obj %}
+        <tr>
+            <td>{{ modification.product }}</td>
+            <td>{{ modification.modification_id }}</td>
+            <td>{{ modification.creation_time }}</td>
+            <td><a href="{% url 'creator-products' creator_id=modification.creator_id %}">{{ modification.creator_id }}</a></td>
+            <td>{{ modification.last_modified_time }}</td>
+            <td><a href="{% url 'last-modified-by-creator' creator_id=modification.last_modified_by_id %}">{{ modification.last_modified_by_id }}</a></td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6">No modification record</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Pagination -->
+<div class="text-center">
+    {% if page_obj.has_previous %}
+        <a href="?page=1">First Page</a>
+        <a href="?page={{ page_obj.previous_page_number }}">Previous Page</a>
+    {% endif %}
+    <span>Page: {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">Next Page</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}">Last Page</a>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% block content %}
+<p>Hello, {{ user.username }}! You are viewing the checkout page.</p>
+
+<form action="{% url 'product-detail' %}" method="get">
+    <button type="submit">Return to product detail page</button>
+</form>
+
+<form id="paymentForm" action="{% url 'process_payment' %}" method="post" onsubmit="return confirmPayment();">
+    {% csrf_token %}
+    <input type="hidden" name="total" value="{{ total_price }}">
+    <input type="submit" value="Payment">
+</form>
+
+<div id="paymentMessage" style="display: none;">
+    Payment successful!
+</div>
+
+<script>
+    function confirmPayment() {
+        // Confirm payment with the user
+        var paymentConfirmed = confirm('Are you sure you want to proceed with the payment?');
+        if (paymentConfirmed) {
+            // If payment is confirmed, display a success message
+            document.getElementById('paymentMessage').style.display = 'block';
+            return true;
+        } else {
+            // If payment is not confirmed, log out the user and redirect to the product page
+            document.cookie = 'sessionid=; Max-Age=0; path=/;';
+            window.location.href = '/product_detail';  
+            return false;
+        }
+    }
+</script>
+{% endblock %}

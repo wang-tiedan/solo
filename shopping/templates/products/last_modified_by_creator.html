@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Last modified creator details{% endblock %}
+
+{% block content %}
+<h2>Last modifications by Creator ID: {{ creator_id }}</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Product ID</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Modification ID</th>
+            <th>Modification Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for modification in modifications %}
+        <tr>
+            <td>{{ modification.product.product_id }}</td>
+            <td>{{ modification.product.name }}</td>
+            <td>{{ modification.product.price }}</td>
+            <td>{{ modification.modification_id }}</td>
+            <td>{{ modification.last_modified_time }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">No modifications found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

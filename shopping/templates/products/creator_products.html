@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}ALL of this Creator's Products{% endblock %}
+
+{% block content %}
+<h2>ALL of creator ID {{ creator_id }}'s Products:</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Product ID</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Description</th>
+            <th>SKU</th>
+            <th>Parent ID</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for product in products %}
+        <tr>
+            <td>{{ product.product_id }}</td>
+            <td>{{ product.name }}</td>
+            <td>{{ product.price }}</td>
+            <td>{{ product.description }}</td>
+            <td>{{ product.sku }}</td>
+            <td>
+                {% for category in product.productcategory_set.all %}
+                    {% if category.category.parent_id %}
+                        {{ category.category.parent_id }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                {% empty %}
+                    N/A
+                {% endfor %}
+            </td>
+            
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6">No products found</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Paid Orders</h2>
+
+{% for order in orders %}
+<h3>Cart ID: {{ order.cart_id }}</h3>
+<p>User: {{ order.user }}</p>
+<p>Total: ${{ order.total }}</p>
+<p>Created At: {{ order.created_at }}</p>
+<table>
+    <tr>
+        <th>Product</th>
+        <th>Quantity</th>
+        <th>Total Price</th>
+    </tr>
+    {% for item in order.items %}
+    <tr>
+        <td>{{ item.product.name }}</td>
+        <td>{{ item.quantity }}</td>
+        <td>${{ item.total_price }}</td> 
+    </tr>
+    {% endfor %}
+</table>
+{% endfor %}
+
+{% endblock %}

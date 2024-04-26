@@ -1,0 +1,26 @@
+<!-- base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
+    <meta charset="UTF-8">
+    <title>{% block title %}My Site{% endblock title %}</title>
+</head>
+<body>
+    <header>
+        <h1>{% block header %}Welcome to My Site{% endblock header %}</h1>
+    </header>
+
+    <main>
+        {% block content %}
+        <!-- Content will go here -->
+        {% endblock content %}
+    </main>
+
+    <footer>
+        <!-- Footer content -->
+    </footer>
+</body>
+</html>
+

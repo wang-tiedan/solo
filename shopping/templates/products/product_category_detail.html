@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Product Category Details{% endblock %}
+
+{% block header %}Product Category Details{% endblock %}
+
+{% block content %}
+    <table>
+        <thead>
+            <tr>
+                <th>Association ID</th>
+                <th>Product ID</th>
+                <th>Category ID</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category in categories %}
+            <tr>
+                <td>{{ category.association_id }}</td>
+                <td>{{ category.product_id }}</td>
+                <td><a href="{% url 'category-detail' category_id=category.category_id %}">{{ category.category_id }}</a></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3">No categories found</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
