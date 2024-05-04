@@ -4,6 +4,7 @@ from django.contrib.auth.views import LoginView, LogoutView
 from .views import admin_logout, add_to_cart, remove_from_cart, clear_cart
 
 urlpatterns = [
+    path('', views.product_detail, name='product-detail'),  
     path('product_detail/', views.product_detail, name='product-detail'),  
     path('product/<str:product_id>/categories/', views.product_category_detail, name='product-category-detail'),
     path('category/<int:category_id>/', views.category_detail, name='category-detail'),

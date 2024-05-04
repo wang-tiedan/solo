@@ -338,9 +338,8 @@ def checkout(request):
     return render(request, 'checkout.html', context)
 
 def process_payment(request):
-    if request.method == 'POST':
-        try:
-            
+    # if request.method == 'POST':
+    #     try:
             user = request.user
             
 
