@@ -3,9 +3,9 @@ from .models import Product, ProductCategory, Category, ProductModification, Ord
 from django.db.models import Q, Count, Max, Min, Avg
 import plotly.express as px
 from plotly.offline import plot
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponse, Http404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
