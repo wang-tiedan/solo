@@ -380,6 +380,7 @@ def payment_success(request):
 @login_required(login_url='user_login')
 def order_list(request):
     if not request.user.is_staff:  # Checks if the user is not an admin
+        messages.error(request, 'You do not have permission to view all orders. Please contact an admin.')
         return redirect('product-detail')
 
     # Fetch all orders (admin sees all orders)
@@ -389,11 +390,11 @@ def order_list(request):
     if orders.count() == 0:
         is_empty = True
 
-    paginator = Paginator(orders, 20)  # Show 10 merchandise per page.
+    paginator = Paginator(orders, 20)  # Show 20 orders per page.
 
     page_number = request.GET.get('page')
-    orders = paginator.get_page(page_number)
+    page_obj = paginator.get_page(page_number)
 
     # Pass the orders to the template
-    return render(request, 'order_list.html', {'orders': orders, 'is_empty': is_empty})
+    return render(request, 'order_list.html', {'orders': page_obj, 'is_empty': is_empty})
 

@@ -3,25 +3,35 @@
 
 <h2>Paid Orders</h2>
 
+<div>
 {% for order in orders %}
-<h3>Cart ID: {{ order.cart_id }}</h3>
-<p>User: {{ order.user }}</p>
-<p>Total: ${{ order.total }}</p>
-<p>Created At: {{ order.created_at }}</p>
-<table>
-    <tr>
-        <th>Product</th>
-        <th>Quantity</th>
-        <th>Total Price</th>
-    </tr>
-    {% for item in order.items %}
-    <tr>
-        <td>{{ item.product.name }}</td>
-        <td>{{ item.quantity }}</td>
-        <td>${{ item.total_price }}</td> 
-    </tr>
-    {% endfor %}
-</table>
+    <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ccc;">
+        <h2>Order ID: {{ order.id }}</h2>
+        <p>User: {{ order.user.username }}</p>
+        <p>Total: ${{ order.total }}</p>
+        <p>Created At: {{ order.created_at }}</p>
+        <p>Last Updated: {{ order.updated_at }}</p>
+        <h3>Items:</h3>
+        <ul>
+            {% for item in order.items.all %}
+            <li>
+                {{ item.quantity }} x {{ item.product_id.name }} at ${{ item.price }} each
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endfor %}
-
+</div>
+<div>
+    <h4>Page Navigation</h4>
+    {% if orders.has_previous %}
+        <a href="?page=1">First</a>
+        <a href="?page={{ orders.previous_page_number }}">Previous</a>
+    {% endif %}
+    <span>Page {{ orders.number }} of {{ orders.paginator.num_pages }}</span>
+    {% if orders.has_next %}
+        <a href="?page={{ orders.next_page_number }}">Next</a>
+        <a href="?page={{ orders.paginator.num_pages }}">Last</a>
+    {% endif %}
+</div>
 {% endblock %}
