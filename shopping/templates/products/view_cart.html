@@ -98,6 +98,7 @@
     {% if request.user.is_authenticated %}
        
         <form action="{% if request.user.is_authenticated %}{% url 'checkout' %}{% else %}{% url 'user_login' %}?next={% url 'checkout' %}{% endif %}" method="get">
+            {% csrf_token %}
             <button type="submit">Proceed to Checkout or back to product page</button>
         </form>
     {% else %}

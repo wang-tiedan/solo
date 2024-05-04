@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Product, ProductCategory, Category, ProductModification, Order
+from .models import Product, ProductCategory, Category, ProductModification, Order, OrderItem
 from django.db.models import Q, Count, Max, Min, Avg
+from django.db import transaction
 import plotly.express as px
 from plotly.offline import plot
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -328,7 +329,6 @@ def checkout(request):
         item.total_price = item.product.price * item.quantity  
     
     total_price = sum(item.total_price for item in items)  # calculate total price
-    
     context = {
         'user': request.user,
         'items': items,
@@ -337,9 +337,38 @@ def checkout(request):
     return render(request, 'checkout.html', context)
 
 def process_payment(request):
-    # if request.method == 'POST':
-    #     try:
-            user = request.user
+    if request.method == 'POST':
+        with transaction.atomic():
+            try:
+                import time
+                carts = Cart.objects.filter(user=request.user)
+                cartItems = CartItem.objects.filter(cart=carts.first())
+                if not carts.exists() and not cartItems.exists():
+                    messages.error(request, 'Your cart is empty.')
+                    time.sleep(3)
+                    return redirect('view_cart')
+            
+                total = request.POST.get('total')
+                order = Order.objects.create(
+                    user=request.user, 
+                    total=total
+                )
+                
+                for item in cartItems:
+                    OrderItem.objects.create(
+                        order=order, 
+                        product_id=item.product, 
+                        price=item.product.price,
+                        quantity=item.quantity
+                    )
+                
+                carts.delete()
+                messages.success(request, 'Your order has been placed.')
+                time.sleep(3)
+                return redirect('payment_success')
+            except Exception as e:
+                messages.error(request, 'An error occurred while processing your payment. Please try again later.')
+                return redirect('view_cart')
             
 
 
